@@ -1,0 +1,110 @@
+// read only pins
+read_only_pins = ["1","2","3","12","13","14","11"];
+//read_only_pins = ["2","3","4","6","12","13","14","11"];
+//dual_pins = ["5","6"];
+// reverse_pins
+reverse_pins = ["21","22","23","24","25","27","28","29","10"];
+
+var container = document.querySelector("#container");
+container.addEventListener("click", buttonManager, false);
+
+//function to change "on click" MIXT pins mode from in to out and after 2 sec vice versa
+//function pin_mode (pin, mode) {
+//}
+
+//this function sends and receives the pin's status
+function change_pin (pin, status) {
+	//this is the http request
+	var request = new XMLHttpRequest();
+	request.open( "GET" , "gpio.php?pin=" + pin + "&status=" + status );
+	request.send(null);
+	//receiving information
+	request.onreadystatechange = function () {
+		if (request.readyState == 4 && request.status == 200) {
+			return (parseInt(request.responseText));
+		}
+		//test if fail
+		else if (request.readyState == 4 && request.status == 500) {
+			alert ("server error");
+			return ("fail");
+		}
+		//else 
+		else { return ("fail"); }
+	}
+}
+
+function button_off(btn) 
+{
+	btn.target = "off";
+	btn.className = "btn_off";
+	btn.parentNode.getElementsByTagName("span")[0].id = "light_red";
+}
+
+function button_on(btn) 
+{
+	btn.target = "on";
+	btn.className = "btn_on";
+	btn.parentNode.getElementsByTagName("span")[0].id = "light_green";
+}
+
+function buttonManager(e) {
+    if(e.target !== e.currentTarget && e.target.id == "emergency_btn") 
+    {
+	button_array = document.getElementsByTagName("a");
+        change_pin(13,-1);
+	for(var i=0; i<button_array.length; i++) 
+	{
+		if(button_array[i].id.substring(0,7) != "button_") continue;
+		pin = button_array[i].id.substring(7,9)
+                if(e.target.target === "off")
+                {	
+			// ignore read only pins
+			if(read_only_pins.indexOf(pin) !== -1) continue;
+			if(i===button_array.length-2) button_off(e.target);
+
+			if (reverse_pins.indexOf(pin) !== -1) var new_status = change_pin(pin,0) 
+			else var new_status = change_pin (pin,1);
+
+			if (new_status !== "fail")
+			{
+				button_off(button_array[i]);
+				e.target.className="btn_on";
+				e.target.parentNode.getElementsByTagName("span")[0].id="light_green"
+			}
+                }
+	}
+    }
+
+    if (e.target !== e.currentTarget && e.target.id.substring(0,7) == "button_") 
+    {
+	var pin = e.target.id.substring(7,9)
+	// ignore read only pins
+	if(read_only_pins.indexOf(pin) !== -1) return 0;
+	
+        if (reverse_pins.indexOf(pin) !== -1)  
+	{
+		if (e.target.target === "on")
+		{
+			var new_status = change_pin (pin, 0);
+			if (new_status !== "fail") { button_off(e.target); return 0; }
+		}
+		else if (e.target.target === "off") 
+		{
+			var new_status = change_pin (pin, 1);
+			if (new_status !== "fail") { button_on(e.target); return 0; }
+		}
+	}
+        else if ( e.target.target === "off" ) 
+	{
+                var new_status = change_pin (pin, 0);
+                if (new_status !== "fail") { button_on(e.target); return 0; }
+	}
+        else if ( e.target.target === "on" ) 
+	{
+                var new_status = change_pin (pin, 1);
+                if (new_status !== "fail") { button_off(e.target); return 0 }
+	}
+
+    }
+    e.stopPropagation();
+}

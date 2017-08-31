@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link href="../../local_fonts/css/FontAwesome/font-awesome.min.css" rel="stylesheet">
+		<link href="css/style.css" rel="stylesheet" type="text/css">
+		<meta http-equiv="refresh" content="5">
+		<meta charset="utf-8" />
+		<style>
+		<!-- a{text-decoration:none} -->
+		</style>
+		<title>IN/OUT STATUS</title>
+	</head>
+	<body>
+
+    <a href="../../index.html"><h2 style="color:green">&nbsp; &nbsp; &nbsp; <i class="fa fa-mail-reply"></i> &nbsp;back</h2><span class="value_text"></a>
+
+    <div id="container">
+	<!-- On/Off button's picture -->
+
+	<?php
+	//this php script generate the first page in function of the gpio's status
+
+		echo("<br>");
+		echo('<div class"description"><div class="main_text"><h1 style="color:red">&nbsp; &nbsp; SENZORI</h1><span class="value_text"></div></div>');
+		//INPUTS
+		$current_label = 0;
+		$status = array (0, 0, 0, 0, 0, 0, 0, 0);
+		//  Sensor Labels
+		$labels = array (
+		"IN#1",
+		"IN#2",
+		"IN#3",
+		"IN#4",
+		"IN#5",
+		"IN#6",
+		"IN#7",
+		"IN#8"
+		);
+		//the used pins are: 1, 2, 3, 12, 13, 14, 5, 6
+		//the pins #5 & #6 have MIXT function: inputs (almost all the time) and outputs (for about 1.5 sec)
+		foreach (array(1,2,3,12,13,14,5,6) as $index => $i) {
+		//set the pin's mode to input and read them
+		system("gpio2 mode ".$i." in");
+		exec ("gpio2 read ".$i, $status[$i], $return );
+		if($index % 4 == 0) { echo("<br>"); }
+		//if off
+		if ($status[$i][0] == 0 ) {
+		echo ("<div class='btn_div'><a class='btn_off' rel='external' id='button_".$i."' target='off'>&#xf08c;</a><span id='light_red'></span>
+                <h4>".$labels[$current_label]."</h4></div>");					//single line label
+                //<div class='btn_label'><h4>".$labels[$current_label]."</h4></div></div>");	//multiple line label
+		}
+		//if on
+		if ($status[$i][0] == 1 ) {
+		echo ("<div class='btn_div'><a class='btn_on' rel='external' id='button_".$i."' target='on'>&#xf08c;</a><span id='light_green'></span>
+                <h4>".$labels[$current_label]."</h4></div>");					//single line label
+                //<div class='btn_label'><h4>".$labels[$current_label]."</h4></div></div>");	//multiple line label
+		}
+		//go to next label
+		$current_label++;
+		}
+
+		echo("<br>");
+		echo('<div class"description"><div class="main_text"><h1 style="color:red">&nbsp; &nbsp; EXECUȚIE</h1><span class="value_text"></div></div>');
+
+		//OUTPUTS
+		$current_label = 0;
+		$status = array (0, 0, 0, 0, 0, 0, 0, 0, 0);
+		$labels = array (
+		// Button Labels	//max 9 characters on line
+		"1WIRE GRID",
+		"OUT#2",
+		"OUT#3",
+		"ARTEZIANĂ",
+		"APĂ SOLAR",
+		"CALORIFER 1",
+		"CALORIFER 2",
+		"LUMINĂ CURTE",
+		"MANUAL",
+		"POWER",
+		"RESET"
+		);
+		//the used pins are: 21, 22, 23, 24, 25, 27, 28, 29, (26), (5), (6)
+		foreach (array(21,22,23,24,25,27,28,29) as $index => $i) {
+		//set the pin's mode to output and read them
+		system("gpio mode ".$i." out");
+		exec ("gpio read ".$i, $status[$i], $return );
+		if($index % 4 == 0) { echo("<br>"); }
+
+		//relays controller with  inversed logic ("idle"=1 & "switched"=0)
+		//if off ( gpio = 1 - "high" level)
+		if ($status[$i][0] == 1 ) {
+		echo ("<div class='btn_div'><a class='btn_off' rel='external' id='button_".$i."' target='off'>&#xF011;</a><span id='light_red'></span>
+                <h4>".$labels[$current_label]."</h4></div>");					//single line label
+                //<div class='btn_label'><h4>".$labels[$current_label]."</h4></div></div>");	//multiple line label
+		}
+		//if on (gpio = 0 - "low" level)
+		if ($status[$i][0] == 0 ) {
+		echo ("<div class='btn_div'><a class='btn_on' rel='external' id='button_".$i."' target='on'>&#xF011;</a><span id='light_green'></span>
+                <h4>".$labels[$current_label]."</h4></div>");					//single line label
+                //<div class='btn_label'><h4>".$labels[$current_label]."</h4></div></div>");	//multiple line label
+		}
+		//go to next label
+		$current_label++;
+		}
+
+		echo("<br>");
+		echo('<div class"description"><div class="main_text"><h1 style="color:red">&nbsp; &nbsp; AUTO</h1><span class="value_text"></div></div>');
+
+		//selection pin (26)
+		for ($i = 26; $i < 27; $i++) {
+		//set the pin's mode to output and read them
+		system("gpio mode ".$i." out");
+		exec ("gpio read ".$i, $status[$i], $return );
+		//if off (gpio = 0 - "low" level)
+		if ($status[$i][0] == 0 ) {
+		echo ("<div class='btn_div'><a class='btn_off' rel='external' id='button_".$i."' target='off'>&#xF0AD;</a><span id='light_red'></span>
+                <h4>".$labels[$current_label]."</h4></div>");					//single line label
+                //<div class='btn_label'><h4>".$labels[$current_label]."</h4></div></div>");	//multiple line label
+		}
+		//if on ( gpio = 1 - "high" level)
+		if ($status[$i][0] == 1 ) {
+		echo ("<div class='btn_div'><a class='btn_on' rel='external' id='button_".$i."' target='on'>&#xF0AD;</a><span id='light_green'></span>
+                <h4>".$labels[$current_label]."</h4></div>");					//single line label
+                //<div class='btn_label'><h4>".$labels[$current_label]."</h4></div></div>");	//multiple line label
+		}
+		//go to next label
+		$current_label++;
+		}
+
+		echo("<br>");
+		echo('<div class"description"><div class="main_text"><h1 style="color:red">&nbsp; &nbsp; GSM</h1><span class="value_text"></div></div>');
+
+		//modem pins (5), (6)
+		//power button (5)
+		for ($i = 5; $i < 6; $i++) {
+		//set the pin's mode to output and read them
+		system("gpio mode ".$i." out");
+		exec ("gpio read ".$i, $status[$i], $return );
+		//if off (gpio = 0 - "low" level)
+		if ($status[$i][0] == 0 ) {
+		echo ("<div class='btn_div'><a class='btn_off' rel='external' id='button_".$i."' target='off'>&#xF021;</a><span id='light_red'></span>
+                <h4>".$labels[$current_label]."</h4></div>");					//single line label
+                //<div class='btn_label'><h4>".$labels[$current_label]."</h4></div></div>");	//multiple line label
+		}
+		//if on ( gpio = 1 - "high" level)
+		if ($status[$i][0] == 1 ) {
+		echo ("<div class='btn_div'><a class='btn_on' rel='external' id='button_".$i."' target='on'>&#xF021;</a><span id='light_green'></span>
+                <h4>".$labels[$current_label]."</h4></div>");					//single line label
+                //<div class='btn_label'><h4>".$labels[$current_label]."</h4></div></div>");	//multiple line label
+		}
+		//go to next label
+		$current_label++;
+		//system("gpio mode ".$i." in");
+		//exec ("gpio read ".$i, $status[$i], $return );
+		}
+		//reset button (1)
+		for ($i = 6; $i < 7; $i++) {
+		//set the pin's mode to output and read them
+		system("gpio mode ".$i." out");
+		exec ("gpio read ".$i, $status[$i], $return );
+		//if off (gpio = 0 - "low" level)
+		if ($status[$i][0] == 0 ) {
+		echo ("<div class='btn_div'><a class='btn_off' rel='external' id='button_".$i."' target='off'>&#xF021;</a><span id='light_red'></span>
+                <h4>".$labels[$current_label]."</h4></div>");					//single line label
+                //<div class='btn_label'><h4>".$labels[$current_label]."</h4></div></div>");	//multiple line label
+		}
+		//if on ( gpio = 1 - "high" level)
+		if ($status[$i][0] == 1 ) {
+		echo ("<div class='btn_div'><a class='btn_on' rel='external' id='button_".$i."' target='on'>&#xF021;</a><span id='light_green'></span>
+                <h4>".$labels[$current_label]."</h4></div>");					//single line label
+                //<div class='btn_label'><h4>".$labels[$current_label]."</h4></div></div>");	//multiple line label
+		}
+		//go to next label
+		$current_label++;
+		}
+	?>
+		<br>
+		<!-- All buttons = ALL -->
+		<!--
+		<div class='btn_div'><a class='btn_off' rel='external' id='toggle_btn' target='off'>&#xF011;</a><span id='light_red'></span><h4>ALL-OUT</h4></div>
+		-->
+	</div>
+	<script src="js/script.js"></script>
+	</body> 
+</html>

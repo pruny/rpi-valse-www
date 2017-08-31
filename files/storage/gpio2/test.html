@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link href="../../local_fonts/css/FontAwesome/font-awesome.min.css" rel="stylesheet">
+		<link href="css/style.css" rel="stylesheet" type="text/css">
+		<meta charset="utf-8" />
+		<title>IN/OUT STATUS</title>
+	</head>
+	<body>
+    <a href="../../index.html" id="back_btn"><i class="fa fa-mail-reply"></i>back</a>
+
+    <div id="app">
+      <span v-for="(item, index) in items">
+        <h1 v-if="index == 0 || item.category != items[index-1].category">{{item.category}}</h1>
+        <div class='btn_div' v-bind:class="[item.value != item.ref_value ? 'btn_on' : '', 'btn_off']">
+            <a @click="btn_press(item)"> <span v-html="item.icon"></span> </a>
+            <span class=btn_light></span>
+            <h4>{{item.label}}</h4>
+        </div>
+      </span>
+    </div>
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.3.4/vue.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.16.2/axios.min.js"></script>
+
+    <script>
+    var app = new Vue({
+      el: '#app',
+      data: {
+        items: [],
+        interval: null,
+				wait_for_data_count: 0
+      },
+      methods: {
+        btn_press: function (item) {
+					if(item.mode == "IN") return false;
+					this.wait_for_data_count += 1;
+					new_val = (item.value == 0) ? 1 : 0;
+					if(item.mode == "MIXT") new_val = 1;
+					item.value = new_val;
+					axios.get("api/write/"+item.pin+"/"+new_val)
+					.then(res => { this.wait_for_data_count -= 1; });
+				},
+        loadData: function () {
+					if(this.wait_for_data_count != 0) return false;
+          axios.get("api/read")
+          .then(res => { this.items = res.data; });
+        }
+      },
+        mounted: function () {
+          this.loadData();
+          this.interval = setInterval(function () {
+            this.loadData();
+          }.bind(this), 2000);
+        },
+
+       beforeDestroy: function(){ clearInterval(this.interval); }
+    });
+    </script>
+  </body>
+
+</html>

@@ -1,0 +1,68 @@
+﻿#!/usr/bin/php
+
+<!-- This page is requested by the JavaScript, it updates the output pin's status and then print it -->
+
+<?php
+
+	$path = "/var/www/TMPFS";
+
+	//getting and using values for pins: 21, 22, 23, 24, 25, 27, 28, 29 and (26), (0), (5)
+
+	if (isset ($_GET["pin"]) && isset($_GET["status"]) ) {
+	$pin = strip_tags($_GET["pin"]);
+	$status = strip_tags($_GET["status"]);
+	$pin_array = array("21","22","23","24","25","27","28","29","26","0","5");
+	}
+
+	//testing if values are numbers
+
+	if ( is_numeric($pin) && is_numeric($status) && in_array($pin,$pin_array) && ($status == "0" || $status == "1" )) {
+
+		//set the gpio's mode to output
+		system ("gpio mode ".$pin." out");
+
+		//set the gpio to high/low ...
+		//and register changing time (use gpio2)
+		$status = ($status xor 1) ? '1' : '0';
+		system ("gpio2 write ".$pin." ".$status );
+
+		//toggle buttons - gpio (0) & (1)
+		if ( is_numeric($pin) && ( $pin=="0" || $pin=="1" )) {
+			if ( $status == "1" ) {
+			//system ("sleep 2 && gpio2 write ".$pin." 0");
+			usleep(1250000);
+			system ("gpio2 write ".$pin." 0");
+			}
+		}
+
+	}
+
+	// granting write permissions to www-data group (permit touch & rm )
+	/*
+	chown -R www-data:www-data /var/www/files/data/TMPFS
+	chmod -R 770 /var/www/files/data/TMPFS
+	*/
+
+	//tap open
+
+	if ( is_numeric($pin) && $pin=="25" ) {
+		if ( $status == "0" ) system ("touch ".$path."/"."tap.open");
+		elseif ( $status == "1" ) {
+		system ("rm -f ".$path."/"."tap.open");
+		}
+	}
+
+	//auto mode
+
+	if ( is_numeric($pin) && $pin=="26" ) {
+		if ( $status == "1" ) system ("touch ".$path."/"."auto.stop");
+		elseif ( $status == "0" ) {
+		system ("rm -f ".$path."/"."auto.stop");
+		}
+	}
+
+	//print fail if cannot use values
+
+	else { echo ("fail"); }
+?>
+

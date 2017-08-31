@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link href="../../local_fonts/css/FontAwesome/font-awesome.min.css" rel="stylesheet">
+		<link href="css/style.css" rel="stylesheet" type="text/css">
+		<link rel="shortcut icon" href="../data/favicon.ico">
+		<meta charset="utf-8" />
+		<title>GSM STATUS</title>
+	</head>
+	<body>
+    <a href="../../index.html" id="back_btn"><i class="fa fa-mail-reply"></i>back</a>
+
+    <div id="app">
+      <span v-for="(item, index) in items">
+        <h1 v-if="index == 0 || item.category != items[index-1].category">{{item.category}}</h1>
+        <div class='btn_div' v-bind:class="[item.value != item.ref_value ? 'btn_on' : '', 'btn_off']">
+            <a @click="btn_press(item)"> <span v-html="item.icon"></span> </a>
+            <span class=btn_light></span>
+            <h4>{{item.label}}</h4>
+        </div>
+      </span>
+    </div>
+<!--
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.3.4/vue.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.16.2/axios.min.js"></script>
+-->
+    <script src="js/vue.min.js"></script>
+    <script src="js/axios.min.js"></script>
+    <script src="js/script.js"></script>
+  </body>
+
+</html>
